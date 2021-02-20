@@ -5,6 +5,7 @@
  *      Author: Samuel Carrasco
  */
 
+// Standard C libraries
 #include <iostream>
 #include <string>
 #include <vector>
@@ -13,9 +14,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/resource.h>
+#include <sys/wait.h>
+
+// Defined libraries for the shell program
 #include "command.hpp"
 #include "parser.hpp"
-#include <sys/wait.h>
 #include "executeShellCommand.hpp"
 
 // Macros for easy reading in code
@@ -23,6 +26,7 @@
 #define SUCCESSFUL 0
 #define FAILED 2
 
+// Helper function to convert cmd object to a pointer to use in execvp function
 int exec(const std::string &cmd, const std::vector<std::string> &args) {
 	// Make an ugly C-style args array.
 	std::vector<char*> c_args = { const_cast<char*>(cmd.c_str()) };
@@ -65,13 +69,13 @@ int executeShellCommand(shell_command cmd) {
 		int exit_status = WEXITSTATUS(status);
 		if ((cmd.next_mode == next_command_mode::on_success)
 				&& (exit_status == FAILED)) {
-			return 1;
+			return FAILED;
 		}
 		if ((cmd.next_mode == next_command_mode::on_fail)
 				&& (exit_status == SUCCESSFUL)) {
-			return 1;
+			return FAILED;
 		}
 
 	}
-	return 0;
+	return SUCCESSFUL;
 }

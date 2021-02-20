@@ -31,7 +31,7 @@
 // Macros for easy reading in code
 #define INTERACTIVE_MODE 1
 #define NUMBER_OF_COMMANDS 500
-#define FAILED 1
+#define FAILED 2
 
 int main(int argc, char *argv[]) {
 	// The string used to collect user input or from a grading script file.

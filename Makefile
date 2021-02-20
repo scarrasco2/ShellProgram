@@ -7,9 +7,9 @@ all: osh
 osh: main.o parser.o executeShellCommand.o
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $^
 
-main.o: main.cpp parser.hpp command.hpp 
+main.o: main.cpp parser.hpp command.hpp executeShellCommand.hpp
 parser.o: parser.cpp parser.hpp
-executeShellCommand.o: parser.cpp parser.hpp executeShellCommand.cpp
+executeShellCommand.o: executeShellCommand.cpp command.hpp parser.hpp executeShellCommand.hpp
 
 .PHONY: clean
 clean:
