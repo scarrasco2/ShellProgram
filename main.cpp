@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unistd.h>
 #include "command.hpp"
 #include "parser.hpp"
 #include "executeShellCommand.hpp"
@@ -31,13 +32,17 @@
 // Macros for easy reading in code
 #define INTERACTIVE_MODE 1
 #define NUMBER_OF_COMMANDS 500
-#define FAILED 2
+#define FAILED 1
 
 int main(int argc, char *argv[]) {
 	// The string used to collect user input or from a grading script file.
 	std::string input_line;
 
 	for (int i = 0; i < NUMBER_OF_COMMANDS; i++) {
+
+		// Save the Standard Input and Standard Output
+		int save_in = dup(STDIN_FILENO);
+		int save_out = dup(STDOUT_FILENO);
 
 		// Print the prompt if the -t option is not given.
 		if (argc == INTERACTIVE_MODE) {
@@ -59,6 +64,11 @@ int main(int argc, char *argv[]) {
 					break;
 
 			}
+
+			// Restore the Standard Input and Standard Output
+			dup2(save_in, STDIN_FILENO);
+			dup2(save_out, STDOUT_FILENO);
+
 		} catch (const std::runtime_error &e) {
 			std::cout << e.what() << "\n";
 		}

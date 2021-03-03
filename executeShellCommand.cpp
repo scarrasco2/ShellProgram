@@ -24,7 +24,9 @@
 // Macros for easy reading in code
 #define CHILD_ID 0
 #define SUCCESSFUL 0
-#define FAILED 2
+#define FAILED 1
+#define READ_END 0
+#define WRITE_END 1
 
 // Helper function to convert cmd object to a pointer to use in execvp function
 int exec(const std::string &cmd, const std::vector<std::string> &args) {
@@ -39,6 +41,8 @@ int exec(const std::string &cmd, const std::vector<std::string> &args) {
 }
 
 int executeShellCommand(shell_command cmd) {
+	int fdp[2];
+	pipe(fdp);
 	int child_id = fork();
 	const char *coutFile = (cmd.cout_file).c_str();
 	const char *cinFile = (cmd.cin_file).c_str();
@@ -57,18 +61,31 @@ int executeShellCommand(shell_command cmd) {
 	}
 
 	else if (child_id == CHILD_ID) {
-		dup2(fdIn, STDIN_FILENO);
-		dup2(fdOut, STDOUT_FILENO);
-		exec(cmd.cmd, cmd.args);
-		exit(1);
+		if (cmd.cout_mode == ostream_mode::pipe) {
+			close(fdp[READ_END]);
+			dup2(fdp[WRITE_END], STDOUT_FILENO);
+			close(fdp[WRITE_END]);
+			exec(cmd.cmd, cmd.args);
+			exit(SUCCESSFUL);
+		} else {
+			dup2(fdIn, STDIN_FILENO);
+			dup2(fdOut, STDOUT_FILENO);
+			exec(cmd.cmd, cmd.args);
+			exit(SUCCESSFUL);
+		}
 	}
 
 	else {
+		if (cmd.cout_mode == ostream_mode::pipe) {
+			close(fdp[WRITE_END]);
+			dup2(fdp[READ_END], STDIN_FILENO);
+			close(fdp[READ_END]);
+		}
 		int status;
 		wait(&status);
 		int exit_status = WEXITSTATUS(status);
 		if ((cmd.next_mode == next_command_mode::on_success)
-				&& (exit_status == FAILED)) {
+				&& (exit_status > SUCCESSFUL)) {
 			return FAILED;
 		}
 		if ((cmd.next_mode == next_command_mode::on_fail)
