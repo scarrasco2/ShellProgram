@@ -15,7 +15,7 @@ executeShellCommand.o: executeShellCommand.cpp command.hpp parser.hpp executeShe
 clean:
 	rm -rf osh *.o
 
-testall: test1 test2 test3 test4 test5
+testall: test1 test2 test3 test4 test5 test6 test7 test8 test9
 
 test1:
 	./osh -t < testscripts/1.singleCommand.txt &> tmp
@@ -36,3 +36,19 @@ test4:
 test5:
 	./osh -t < testscripts/5.malformed.txt &> tmp
 	diff tmp testscripts/ea5.txt
+
+test6:
+	./osh -t < testscripts/6.singlePipe.txt &> tmp
+	diff tmp testscripts/ea6.txt
+
+test7:
+	./osh -t < testscripts/7.moreLogical.txt &> tmp
+	diff tmp testscripts/ea7.txt
+
+test8:
+	./osh -t < testscripts/8.morePipes.txt &> tmp
+	diff tmp testscripts/ea8.txt
+
+test9:
+	./osh -t < testscripts/9.simplePipeAndLogical.txt &> tmp
+	diff tmp testscripts/ea9.txt
